@@ -97,4 +97,38 @@ router.delete('/:pet_id', async function (req, res) {
   }
 })
 
+/**
+ *
+ */
+router.patch('/:pet_id', async function (req, res) {
+  const pet = await api.get_entity_by_id(PET, req.params.pet_id)
+
+  if (pet[0] === undefined) {
+    res.status(404).json({ Error: 'No pet with this pet_id exists' })
+  } else {
+    const response_data = await api.validation_check(req, 'patch', PET)
+
+    if (!response_data.valid) {
+      res.status(response_data.code).json({ Error: response_data.message })
+    } else {
+      const edited_pet_data = {
+        name: req.body.name ? req.body.name : pet[0].name,
+        species: req.body.species ? req.body.species : pet[0].species,
+        age: req.body.age ? req.body.age : pet[0].age,
+        shelter: pet[0].shelter,
+        adopted: pet[0].adopted,
+      }
+
+      const edit_data = await api.edit_entity(PET, req.params.pet_id, edited_pet_data)
+      const edited_pet = await api.get_entity_by_id(PET, req.params.pet_id)
+
+      const pet_url = req.protocol + '://' + req.get('host') + req.originalUrl
+      edited_pet[0].id = req.params.pet_id
+      edited_pet[0].self = pet_url
+
+      res.status(303).set('Location', pet_url).json(edited_pet[0])
+    }
+  }
+})
+
 module.exports = router

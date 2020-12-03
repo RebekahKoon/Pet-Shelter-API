@@ -53,12 +53,10 @@ function get_entities(kind) {
  * @returns {all entities of the specified kind} entities
  */
 function get_entities_pagination(kind, req) {
-  var query
-  if (req.user.sub) {
-    query = datastore.createQuery(kind).filter('owner', '=', req.user.sub).limit(5)
-  } else {
-    query = datastore.createQuery(kind).limit(5)
-  }
+  var query =
+    kind === SHELTER
+      ? datastore.createQuery(kind).filter('owner', '=', req.user.sub).limit(5)
+      : datastore.createQuery(kind).limit(5)
 
   const results = {}
 

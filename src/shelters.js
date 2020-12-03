@@ -62,21 +62,26 @@ router.get('/:shelter_id', jwt_info.checkJwt, jwt_info.invalid_jwt, async functi
  *
  */
 router.get('/', jwt_info.checkJwt, jwt_info.invalid_jwt, async function (req, res) {
-  var shelters = await api.get_entities_pagination(SHELTER, req)
+  const accepts = req.accepts(['application/json'])
+  if (!accepts) {
+    res.status(406).json({ Error: 'application/json is the only supported content type' })
+  } else {
+    var shelters = await api.get_entities_pagination(SHELTER, req)
 
-  shelters.items.map((shelter) => {
-    shelter.self = req.protocol + '://' + req.get('host') + req.baseUrl + '/' + shelter.id
+    shelters.items.map((shelter) => {
+      shelter.self = req.protocol + '://' + req.get('host') + '/shelters/' + shelter.id
 
-    shelter.pets.map((pet) => {
-      pet.self = req.protocol + '://' + req.get('host') + '/pets/' + pet.id
+      shelter.pets.map((pet) => {
+        pet.self = req.protocol + '://' + req.get('host') + '/pets/' + pet.id
+      })
     })
-  })
 
-  if (shelters.next) {
-    decodeURIComponent(shelters.next)
+    if (shelters.next) {
+      decodeURIComponent(shelters.next)
+    }
+
+    res.status(200).json(shelters)
   }
-
-  res.status(200).json(shelters)
 })
 
 /**

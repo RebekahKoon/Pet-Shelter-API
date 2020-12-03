@@ -59,6 +59,33 @@ router.get('/:pet_id', async function (req, res) {
 /**
  *
  */
+router.get('/', async function (req, res) {
+  const accepts = req.accepts(['application/json'])
+
+  if (!accepts) {
+    res.status(406).json({ Error: 'application/json is the only supported content type' })
+  } else {
+    const pets = await api.get_entities_pagination(PET, req)
+
+    pets.items.map((pet) => {
+      pet.self = req.protocol + '://' + req.get('host') + '/pets/' + pet.id
+
+      if (Object.keys(pet.shelter).length !== 0) {
+        pet.shelter.self = req.protocol + '://' + req.get('host') + '/shelters/' + pet.shelter.id
+      }
+    })
+
+    if (pets.next) {
+      decodeURIComponent(pets.next)
+    }
+
+    res.status(200).json(pets)
+  }
+})
+
+/**
+ *
+ */
 router.delete('/:pet_id', async function (req, res) {
   const pet = await api.get_entity_by_id(PET, req.params.pet_id)
 

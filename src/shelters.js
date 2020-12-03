@@ -108,6 +108,8 @@ router.patch('/:shelter_id', jwt_info.checkJwt, jwt_info.invalid_jwt, async func
 
     if (!response_data.valid) {
       res.status(response_data.code).json({ Error: response_data.message })
+    } else if (shelter[0].owner !== req.user.sub) {
+      res.status(403).json({ Error: 'This shelter belongs to someone else' })
     } else {
       var edited_shelter_data = {
         name: req.body.name ? req.body.name : shelter[0].name,

@@ -56,4 +56,18 @@ router.get('/:pet_id', async function (req, res) {
   }
 })
 
+/**
+ *
+ */
+router.delete('/:pet_id', async function (req, res) {
+  const pet = await api.get_entity_by_id(PET, req.params.pet_id)
+
+  if (pet[0] === undefined) {
+    res.status(404).json({ Error: 'No pet with this pet_id exists' })
+  } else {
+    const deleted_pet = await api.delete_entity(PET, req.params.pet_id)
+    res.status(204).end()
+  }
+})
+
 module.exports = router

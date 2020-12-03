@@ -221,7 +221,7 @@ async function validation_check(req, functionality, entity) {
       if (req.body.capacity) {
         message = 'A shelter’s capacity must be in the range of 1 to 500'
       } else {
-        message = 'A pet’s age must be in the range of 1 to 25'
+        message = 'A pet’s age must be in the range of 0 to 25'
       }
 
       // Length not in required range

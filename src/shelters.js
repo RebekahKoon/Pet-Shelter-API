@@ -136,4 +136,42 @@ router.patch('/:shelter_id', jwt_info.checkJwt, jwt_info.invalid_jwt, async func
   }
 })
 
+/**
+ *
+ */
+router.put(
+  '/:shelter_id/pets/:pet_id',
+  jwt_info.checkJwt,
+  jwt_info.invalid_jwt,
+  async function (req, res) {
+    const shelter = await api.get_entity_by_id(SHELTER, req.params.shelter_id)
+    const pet = await api.get_entity_by_id(PET, req.params.pet_id)
+
+    if (shelter[0] === undefined) {
+      res.status(403).json({ Error: 'No shelter with this shelter_id exists' })
+    } else if (pet[0] === undefined) {
+      res.status(404).json({ Error: 'No pet with this pet_id exists' })
+    } else if (shelter[0].owner !== req.user.sub) {
+      res.status(403).json({ Error: 'This shelter belongs to someone else' })
+    } else if (Object.keys(pet[0].shelter).length !== 0) {
+      res.status(403).json({ Error: 'This pet is already in a shelter' })
+    } else {
+      shelter[0].pets.push({
+        id: req.params.pet_id,
+        name: pet[0].name,
+      })
+
+      pet[0].shelter = {
+        id: req.params.shelter_id,
+        name: shelter[0].name,
+      }
+
+      const edited_shelter = await api.edit_entity(SHELTER, req.params.shelter_id, shelter[0])
+      const edited_pet = await api.edit_entity(PET, req.params.pet_id, pet[0])
+
+      res.status(204).end()
+    }
+  }
+)
+
 module.exports = router

@@ -52,6 +52,11 @@ router.get('/:pet_id', async function (req, res) {
     pet[0].id = req.params.pet_id
     pet[0].self = req.protocol + '://' + req.get('host') + req.originalUrl
 
+    if (Object.keys(pet[0].shelter).length !== 0) {
+      pet[0].shelter.self =
+        req.protocol + '://' + req.get('host') + '/shelters/' + pet[0].shelter.id
+    }
+
     res.status(200).json(pet[0])
   }
 })
@@ -92,6 +97,16 @@ router.delete('/:pet_id', async function (req, res) {
   if (pet[0] === undefined) {
     res.status(404).json({ Error: 'No pet with this pet_id exists' })
   } else {
+    if (Object.keys(pet[0].shelter).length !== 0) {
+      const shelter = await api.get_entity_by_id(SHELTER, pet[0].shelter.id)
+
+      shelter[0].pets = shelter[0].pets.filter((pet) => {
+        pet.id !== req.params.pet_id
+      })
+
+      const edited_shelter = await api.edit_entity(SHELTER, pet[0].shelter.id, shelter[0])
+    }
+
     const deleted_pet = await api.delete_entity(PET, req.params.pet_id)
     res.status(204).end()
   }

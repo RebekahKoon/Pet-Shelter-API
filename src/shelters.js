@@ -178,6 +178,8 @@ router.put(
         name: shelter[0].name,
       }
 
+      pet[0].adopted = false
+
       const edited_shelter = await api.edit_entity(SHELTER, req.params.shelter_id, shelter[0])
       const edited_pet = await api.edit_entity(PET, req.params.pet_id, pet[0])
 

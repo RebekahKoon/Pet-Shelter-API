@@ -53,8 +53,8 @@ router.post('/', async function (req, res, next) {
  * page that displays user information is then rendered.
  */
 router.get('/token', function (req, res) {
-  const username = req.session.username
-  const password = req.session.password
+  const username = req.body.username ? req.body.username : req.session.username
+  const password = req.body.password ? req.body.password : req.session.password
   const domain = jwtInfo.DOMAIN
 
   // Information to login to account
@@ -73,16 +73,18 @@ router.get('/token', function (req, res) {
   }
 
   request(data, (error, response, body) => {
-    var token = 'Incorrect user information. Please try again.'
+    const token = body.id_token ? body.id_token : 'Incorrect user information. Please try again.'
+    const accepts = req.accepts(['application/json', 'text/html'])
 
-    // Finding token to display
-    if (body.id_token) {
-      token = body.id_token
+    if (accepts === 'application/json') {
+      res.status(200).json({ Token: token })
+    } else if (accepts === 'text/html') {
+      res.render('../templates/user.html', {
+        token: token,
+      })
+    } else {
+      res.status(406).send({ Error: 'application/json is the only supported content type' })
     }
-
-    res.render('../templates/user.html', {
-      token: token,
-    })
   })
 })
 

@@ -89,6 +89,33 @@ router.get('/', async function (req, res) {
 })
 
 /**
+ * Delete route is not supported on the root pets URL. An error message will
+ * be displayed if an attempt to delete is made.
+ */
+router.delete('/', function (req, res) {
+  res.set('Accept', 'GET, POST')
+  res.status(405).json({ Error: 'You cannot use DELETE on the root URL' })
+})
+
+/**
+ * Put route is not supported on the root pets URL. An error message will
+ * be displayed if an attempt to put is made.
+ */
+router.put('/', function (req, res) {
+  res.set('Accept', 'GET, POST')
+  res.status(405).json({ Error: 'You cannot use PUT on the root URL' })
+})
+
+/**
+ * Patch route is not supported on the root pets URL. An error message will
+ * be displayed if an attempt to put is made.
+ */
+router.patch('/', function (req, res) {
+  res.set('Accept', 'GET, POST')
+  res.status(405).json({ Error: 'You cannot use PATCH on the root URL' })
+})
+
+/**
  *
  */
 router.delete('/:pet_id', async function (req, res) {

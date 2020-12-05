@@ -100,10 +100,11 @@ router.delete('/:shelter_id', jwt_info.checkJwt, jwt_info.invalid_jwt, async fun
     res.status(403).json({ Error: 'This shelter belongs to someone else' })
   } else {
     if (shelter[0].pets.length !== 0) {
-      shelter[0].pets.map(async (pet) => {
-        pet.shelter = {}
+      shelter[0].pets.map(async (entity) => {
+        const pet = await api.get_entity_by_id(PET, entity.id)
 
-        const edited_pet = await api.edit_entity(PET, pet.id, pet)
+        pet[0].shelter = {}
+        const edited_pet = await api.edit_entity(PET, entity.id, pet[0])
       })
     }
 

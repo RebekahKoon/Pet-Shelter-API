@@ -100,9 +100,7 @@ router.delete('/:pet_id', async function (req, res) {
     if (Object.keys(pet[0].shelter).length !== 0) {
       const shelter = await api.get_entity_by_id(SHELTER, pet[0].shelter.id)
 
-      shelter[0].pets = shelter[0].pets.filter((pet) => {
-        pet.id !== req.params.pet_id
-      })
+      shelter[0].pets = shelter[0].pets.filter((pet) => pet.id !== req.params.pet_id)
 
       const edited_shelter = await api.edit_entity(SHELTER, pet[0].shelter.id, shelter[0])
     }

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Welcome!</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+      crossorigin="anonymous"
+    />
+    <!-- Source for CSS: https://getbootstrap.com/docs/4.0/getting-started/introduction/ -->
+  </head>
+  <body>
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col"></div>
+        <div class="col-5">
+          <h1>Welcome!</h1>
+
+          <p>
+            This page is for CS 493 Homework 7. Please enter your email and password below in order
+            to display your Auth0 JWT. If you have not already signed up, then an account will be
+            made for you using the email and password entered. If you have already signed up, then
+            you will be logged in.
+          </p>
+
+          <form method="post" action="/account">
+            <input type="text" name="username" placeholder="Username" />
+            <input type="password" name="password" placeholder="Password" />
+            <input type="submit" value="Submit" />
+          </form>
+        </div>
+        <div class="col"></div>
+      </div>
+    </div>
+  </body>
+</html>

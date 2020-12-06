@@ -152,10 +152,10 @@ async function validation_check(req, functionality, entity) {
     // Invalid character
     response_data = validation_response(false, 400, 'An invalid character was entered')
   } else if (
-    (functionality === 'post' &&
+    ((functionality === 'post' || functionality === 'put') &&
       entity === SHELTER &&
       (!req.body.name || !req.body.address || !req.body.capacity)) ||
-    (functionality === 'post' &&
+    ((functionality === 'post' || functionality === 'put') &&
       entity === PET &&
       (!req.body.name || !req.body.species || !req.body.age))
   ) {

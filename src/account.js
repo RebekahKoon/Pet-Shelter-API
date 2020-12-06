@@ -3,10 +3,13 @@ const bodyParser = require('body-parser')
 const request = require('request')
 const url = require('url')
 
+const api = require('./api')
 const jwtInfo = require('../jwt')
 
 const router = express.Router()
 router.use(bodyParser.json())
+
+const USER = 'User'
 
 /**
  * Route for a user to create an account for auth0. If the
@@ -36,7 +39,18 @@ router.post('/', async function (req, res, next) {
   }
 
   // Sending data to create account
-  request(data, (error, response, body) => {
+  request(data, async (error, response, body) => {
+    if (body.name !== 'BadRequestError') {
+      req.session.auth0_id = 'auth0|' + body._id
+
+      const user_data = {
+        email: body.email,
+        auth0_id: req.session.auth0_id,
+      }
+
+      const entity = await api.post_entity(USER, user_data)
+    }
+
     // Redirect to display token
     res.redirect(
       url.format({
@@ -52,9 +66,10 @@ router.post('/', async function (req, res, next) {
  * was incorrect, then an error message is displayed. The
  * page that displays user information is then rendered.
  */
-router.get('/token', function (req, res) {
+router.get('/token', async function (req, res) {
   const username = req.body.username ? req.body.username : req.session.username
   const password = req.body.password ? req.body.password : req.session.password
+
   const domain = jwtInfo.DOMAIN
 
   // Information to login to account
@@ -72,15 +87,21 @@ router.get('/token', function (req, res) {
     json: true,
   }
 
-  request(data, (error, response, body) => {
+  request(data, async (error, response, body) => {
     const token = body.id_token ? body.id_token : 'Incorrect user information. Please try again.'
     const accepts = req.accepts(['application/json', 'text/html'])
 
     if (accepts === 'application/json') {
-      res.status(200).json({ Token: token })
+      const users = await api.get_entities(USER)
+      const user = users.find((user) => user.email === username)
+
+      res.status(200).json({ Token: token, 'Auth0 ID': user.auth0_id })
     } else if (accepts === 'text/html') {
+      const auth0_id = req.session.auth0_id
+
       res.render('../templates/user.html', {
         token: token,
+        auth0_id: auth0_id,
       })
     } else {
       res.status(406).send({ Error: 'application/json is the only supported content type' })

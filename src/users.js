@@ -91,13 +91,13 @@ router.get('/token', async function (req, res) {
     const token = body.id_token ? body.id_token : 'Incorrect user information. Please try again.'
     const accepts = req.accepts(['application/json', 'text/html'])
 
-    if (accepts === 'application/json') {
-      const users = await api.get_entities(USER)
-      const user = users.find((user) => user.email === username)
+    const users = await api.get_entities(USER)
+    const user = users.find((user) => user.email === username)
 
+    if (accepts === 'application/json') {
       res.status(200).json({ Token: token, 'Auth0 ID': user.auth0_id })
     } else if (accepts === 'text/html') {
-      const auth0_id = req.session.auth0_id
+      const auth0_id = user.auth0_id
 
       res.render('../templates/user.html', {
         token: token,

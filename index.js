@@ -15,6 +15,6 @@
 const router = (module.exports = require('express').Router())
 
 router.use('/', require('./src/welcome'))
-router.use('/account', require('./src/account'))
+router.use('/users', require('./src/users'))
 router.use('/shelters', require('./src/shelters'))
 router.use('/pets', require('./src/pets'))

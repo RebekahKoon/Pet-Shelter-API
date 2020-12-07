@@ -54,7 +54,7 @@ router.post('/', async function (req, res, next) {
     // Redirect to display token
     res.redirect(
       url.format({
-        pathname: '/account/token',
+        pathname: '/users/token',
       })
     )
   })
@@ -107,6 +107,17 @@ router.get('/token', async function (req, res) {
       res.status(406).send({ Error: 'application/json is the only supported content type' })
     }
   })
+})
+
+router.get('/', async function (req, res) {
+  const users = await api.get_entities(USER)
+  const accepts = req.accepts(['application/json'])
+
+  if (!accepts) {
+    res.status(406).json({ Error: 'application/json is the only supported content type' })
+  } else {
+    res.status(200).json(users)
+  }
 })
 
 module.exports = router

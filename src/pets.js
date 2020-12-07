@@ -71,6 +71,7 @@ router.get('/', async function (req, res) {
     res.status(406).json({ Error: 'application/json is the only supported content type' })
   } else {
     const pets = await api.get_entities_pagination(PET, req)
+    const total_pets = await api.get_entities(PET)
 
     pets.items.map((pet) => {
       pet.self = req.protocol + '://' + req.get('host') + '/pets/' + pet.id
@@ -83,6 +84,8 @@ router.get('/', async function (req, res) {
     if (pets.next) {
       decodeURIComponent(pets.next)
     }
+
+    pets['Total pets'] = total_pets.length
 
     res.status(200).json(pets)
   }

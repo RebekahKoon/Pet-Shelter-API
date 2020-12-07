@@ -71,6 +71,7 @@ router.get('/', jwt_info.checkJwt, jwt_info.invalid_jwt, async function (req, re
     res.status(406).json({ Error: 'application/json is the only supported content type' })
   } else {
     var shelters = await api.get_entities_pagination(SHELTER, req)
+    var total_shelters = await api.get_entities(SHELTER)
 
     shelters.items.map((shelter) => {
       shelter.self = req.protocol + '://' + req.get('host') + '/shelters/' + shelter.id
@@ -79,6 +80,8 @@ router.get('/', jwt_info.checkJwt, jwt_info.invalid_jwt, async function (req, re
         pet.self = req.protocol + '://' + req.get('host') + '/pets/' + pet.id
       })
     })
+
+    shelters['Total shelters'] = total_shelters.length
 
     if (shelters.next) {
       decodeURIComponent(shelters.next)

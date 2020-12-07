@@ -45,7 +45,7 @@ function get_entities(kind) {
 }
 
 /**
- * Finds one page of 3 entities of the specified kind in the datastore.
+ * Finds one page of 5 entities of the specified kind in the datastore.
  * If any more entities are in the datastore, then a URL is provided
  * for the next page.
  * @param {kind of entities} kind

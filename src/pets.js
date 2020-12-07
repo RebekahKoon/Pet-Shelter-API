@@ -2,7 +2,7 @@ const express = require('express')
 const bodyParser = require('body-parser')
 
 const api = require('./api')
-const jwt_info = require('../jwt')
+const validation = require('./validation')
 
 const router = express.Router()
 router.use(bodyParser.json())
@@ -14,7 +14,7 @@ const PET = 'Pet'
  *
  */
 router.post('/', async function (req, res) {
-  const response_data = await api.validation_check(req, 'post', PET)
+  const response_data = await validation.validation_check(req, 'post', PET)
 
   if (!response_data.valid) {
     res.status(response_data.code).json({ Error: response_data.message })
@@ -149,7 +149,7 @@ router.patch('/:pet_id', async function (req, res) {
   if (pet[0] === undefined) {
     res.status(404).json({ Error: 'No pet with this pet_id exists' })
   } else {
-    const response_data = await api.validation_check(req, 'patch', PET)
+    const response_data = await validation.validation_check(req, 'patch', PET)
 
     if (!response_data.valid) {
       res.status(response_data.code).json({ Error: response_data.message })
@@ -183,7 +183,7 @@ router.put('/:pet_id', async function (req, res) {
   if (pet[0] === undefined) {
     res.status(404).json({ Error: 'No pet with this pet_id exists' })
   } else {
-    const response_data = await api.validation_check(req, 'put', PET)
+    const response_data = await validation.validation_check(req, 'put', PET)
 
     if (!response_data.valid) {
       res.status(response_data.code).json({ Error: response_data.message })

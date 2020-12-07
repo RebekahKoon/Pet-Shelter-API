@@ -2,6 +2,7 @@ const express = require('express')
 const bodyParser = require('body-parser')
 
 const api = require('./api')
+const validation = require('./validation')
 const jwt_info = require('../jwt')
 
 const router = express.Router()
@@ -14,7 +15,7 @@ const PET = 'Pet'
  *
  */
 router.post('/', jwt_info.checkJwt, jwt_info.invalid_jwt, async function (req, res) {
-  const response_data = await api.validation_check(req, 'post', SHELTER)
+  const response_data = await validation.validation_check(req, 'post', SHELTER)
 
   if (!response_data.valid) {
     res.status(response_data.code).json({ Error: response_data.message })
@@ -152,7 +153,7 @@ router.patch('/:shelter_id', jwt_info.checkJwt, jwt_info.invalid_jwt, async func
   if (shelter[0] === undefined) {
     res.status(403).json({ Error: 'No shelter with this shelter_id exists' })
   } else {
-    const response_data = await api.validation_check(req, 'patch', SHELTER)
+    const response_data = await validation.validation_check(req, 'patch', SHELTER)
 
     if (!response_data.valid) {
       res.status(response_data.code).json({ Error: response_data.message })
@@ -188,7 +189,7 @@ router.put('/:shelter_id', jwt_info.checkJwt, jwt_info.invalid_jwt, async functi
   if (shelter[0] === undefined) {
     res.status(403).json({ Error: 'No shelter with this shelter_id exists' })
   } else {
-    const response_data = await api.validation_check(req, 'put', SHELTER)
+    const response_data = await validation.validation_check(req, 'put', SHELTER)
 
     if (!response_data.valid) {
       res.status(response_data.code).json({ Error: response_data.message })

@@ -89,23 +89,16 @@ router.get('/token', async function (req, res) {
 
   request(data, async (error, response, body) => {
     const token = body.id_token ? body.id_token : 'Incorrect user information. Please try again.'
-    const accepts = req.accepts(['application/json', 'text/html'])
 
     const users = await api.get_entities(USER)
     const user = users.find((user) => user.email === username)
 
-    if (accepts === 'application/json') {
-      res.status(200).json({ Token: token, 'Auth0 ID': user.auth0_id })
-    } else if (accepts === 'text/html') {
-      const auth0_id = user.auth0_id
+    const auth0_id = user.auth0_id
 
-      res.render('../templates/user.html', {
-        token: token,
-        auth0_id: auth0_id,
-      })
-    } else {
-      res.status(406).send({ Error: 'application/json is the only supported content type' })
-    }
+    res.render('../templates/user.html', {
+      token: token,
+      auth0_id: auth0_id,
+    })
   })
 })
 

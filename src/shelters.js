@@ -12,12 +12,14 @@ const SHELTER = 'Shelter'
 const PET = 'Pet'
 
 /**
- *
+ * Route to create a shelter. The creation of a shelter is a protected endpoint.
+ * If all data is valid, then the shelter will be created.
  */
 router.post('/', jwt_info.checkJwt, jwt_info.invalid_jwt, async function (req, res) {
   const response_data = await validation.validation_check(req, 'post', SHELTER)
 
   if (!response_data.valid) {
+    // Data not valid
     res.status(response_data.code).json({ Error: response_data.message })
   } else {
     const data = {
@@ -30,6 +32,7 @@ router.post('/', jwt_info.checkJwt, jwt_info.invalid_jwt, async function (req, r
 
     const entity = await api.post_entity(SHELTER, data)
 
+    // Getting shelter information
     const shelter = await api.get_entity_by_id(SHELTER, entity.id)
     shelter[0].id = entity.id
     shelter[0].self = req.protocol + '://' + req.get('host') + req.originalUrl + '/' + entity.id
@@ -39,7 +42,9 @@ router.post('/', jwt_info.checkJwt, jwt_info.invalid_jwt, async function (req, r
 })
 
 /**
- *
+ * Route to get a shelter through the shelter's ID sent through the request parameter.
+ * This is a protected endpoint. If the jwt entered matches the shelter's owner, then
+ * the shelter's information will be displayed.
  */
 router.get('/:shelter_id', jwt_info.checkJwt, jwt_info.invalid_jwt, async function (req, res) {
   const shelter = await api.get_entity_by_id(SHELTER, req.params.shelter_id)
@@ -55,6 +60,7 @@ router.get('/:shelter_id', jwt_info.checkJwt, jwt_info.invalid_jwt, async functi
     shelter[0].id = req.params.shelter_id
     shelter[0].self = req.protocol + '://' + req.get('host') + req.originalUrl
 
+    // Finding url for each pet in the shelter
     shelter[0].pets.map((pet) => {
       pet.self = req.protocol + '://' + req.get('host') + '/pets/' + pet.id
     })
@@ -64,7 +70,7 @@ router.get('/:shelter_id', jwt_info.checkJwt, jwt_info.invalid_jwt, async functi
 })
 
 /**
- *
+ * Route to get all shelters that belong to a user. This is a protected endpoint.
  */
 router.get('/', jwt_info.checkJwt, jwt_info.invalid_jwt, async function (req, res) {
   const accepts = req.accepts(['application/json'])
@@ -72,16 +78,22 @@ router.get('/', jwt_info.checkJwt, jwt_info.invalid_jwt, async function (req, re
     res.status(406).json({ Error: 'application/json is the only supported content type' })
   } else {
     var shelters = await api.get_entities_pagination(SHELTER, req)
+    // Getting all shelters to count the total number of shelters in Datastore
     var total_shelters = await api.get_entities(SHELTER)
 
+    // Finding URL of each shelter belonging the the user
     shelters.items.map((shelter) => {
       shelter.self = req.protocol + '://' + req.get('host') + '/shelters/' + shelter.id
 
+      // Finding URL of each pet in the shelter
       shelter.pets.map((pet) => {
         pet.self = req.protocol + '://' + req.get('host') + '/pets/' + pet.id
       })
     })
 
+    total_shelters = total_shelters.filter((shelter) => shelter.owner === req.user.sub)
+
+    // Total shelters in Datastore
     shelters['Total shelters'] = total_shelters.length
 
     if (shelters.next) {
@@ -120,7 +132,8 @@ router.patch('/', function (req, res) {
 })
 
 /**
- *
+ * Route to delete a shelter. This is a protected endpoint. The shelter will be
+ * deleted if the shelter exists and belongs to the user making the request.
  */
 router.delete('/:shelter_id', jwt_info.checkJwt, jwt_info.invalid_jwt, async function (req, res) {
   const shelter = await api.get_entity_by_id(SHELTER, req.params.shelter_id)
@@ -130,6 +143,7 @@ router.delete('/:shelter_id', jwt_info.checkJwt, jwt_info.invalid_jwt, async fun
   } else if (shelter[0].owner !== req.user.sub) {
     res.status(403).json({ Error: 'This shelter belongs to someone else' })
   } else {
+    // Any pets will be removed from the shelter when shelter is deleted
     if (shelter[0].pets.length !== 0) {
       shelter[0].pets.map(async (entity) => {
         const pet = await api.get_entity_by_id(PET, entity.id)
@@ -145,7 +159,9 @@ router.delete('/:shelter_id', jwt_info.checkJwt, jwt_info.invalid_jwt, async fun
 })
 
 /**
- *
+ * Route to edit one or more of a shelter's attributes. This is a protected endpoint.
+ * The shelter will be edited if the shelter exists, valid data was entered, and the
+ *  shelter belongs to the user making the request.
  */
 router.patch('/:shelter_id', jwt_info.checkJwt, jwt_info.invalid_jwt, async function (req, res) {
   const shelter = await api.get_entity_by_id(SHELTER, req.params.shelter_id)
@@ -156,10 +172,12 @@ router.patch('/:shelter_id', jwt_info.checkJwt, jwt_info.invalid_jwt, async func
     const response_data = await validation.validation_check(req, 'patch', SHELTER)
 
     if (!response_data.valid) {
+      // Data not valid
       res.status(response_data.code).json({ Error: response_data.message })
     } else if (shelter[0].owner !== req.user.sub) {
       res.status(403).json({ Error: 'This shelter belongs to someone else' })
     } else {
+      // Editing shelter data
       var edited_shelter_data = {
         name: req.body.name ? req.body.name : shelter[0].name,
         address: req.body.address ? req.body.address : shelter[0].address,
@@ -181,7 +199,9 @@ router.patch('/:shelter_id', jwt_info.checkJwt, jwt_info.invalid_jwt, async func
 })
 
 /**
- *
+ * Route to edit all of a shelter's attributes. This is a protected endpoint. The shelter
+ * will be edited if the shelter exists, valid data was entered, and the shelter belongs
+ * to the user making the request.
  */
 router.put('/:shelter_id', jwt_info.checkJwt, jwt_info.invalid_jwt, async function (req, res) {
   const shelter = await api.get_entity_by_id(SHELTER, req.params.shelter_id)
@@ -192,10 +212,12 @@ router.put('/:shelter_id', jwt_info.checkJwt, jwt_info.invalid_jwt, async functi
     const response_data = await validation.validation_check(req, 'put', SHELTER)
 
     if (!response_data.valid) {
+      // Data not valid
       res.status(response_data.code).json({ Error: response_data.message })
     } else if (shelter[0].owner !== req.user.sub) {
       res.status(403).json({ Error: 'This shelter belongs to someone else' })
     } else {
+      // Editing shelter data
       var edited_shelter_data = {
         name: req.body.name,
         address: req.body.address,
@@ -217,7 +239,9 @@ router.put('/:shelter_id', jwt_info.checkJwt, jwt_info.invalid_jwt, async functi
 })
 
 /**
- *
+ * Route to put a pet within a shelter. This is a protected endpoint. The pet
+ * will be put in the shelter if both the pet and shelter exist, the shelter
+ * belongs to the user making the request, and the pet is not in a shelter.
  */
 router.put(
   '/:shelter_id/pets/:pet_id',
@@ -236,6 +260,7 @@ router.put(
     } else if (Object.keys(pet[0].shelter).length !== 0) {
       res.status(403).json({ Error: 'This pet is already in a shelter' })
     } else {
+      // Adding pet to shelter
       shelter[0].pets.push({
         id: req.params.pet_id,
         name: pet[0].name,
@@ -257,7 +282,9 @@ router.put(
 )
 
 /**
- *
+ * Pet to remove a pet from a shelter. This is a protected endpoint. The pet will
+ * be removed if both the pet and shelter exist, the shelter belongs to the user
+ * making the request, and the pet is in the shelter.
  */
 router.delete(
   '/:shelter_id/pets/:pet_id',
@@ -276,6 +303,7 @@ router.delete(
     } else if (pet[0].shelter.id !== req.params.shelter_id) {
       res.status(403).json({ Error: 'The pet is not in this shelter' })
     } else {
+      // Removing pet from shelter
       shelter[0].pets = shelter[0].pets.filter((pet) => pet.id !== req.params.pet_id)
 
       pet[0].shelter = {}

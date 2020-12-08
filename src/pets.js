@@ -11,12 +11,14 @@ const SHELTER = 'Shelter'
 const PET = 'Pet'
 
 /**
- *
+ * Route to create a pet. This is an unprotected route. The pet will be
+ * added to Datastore if the data is valid.
  */
 router.post('/', async function (req, res) {
   const response_data = await validation.validation_check(req, 'post', PET)
 
   if (!response_data.valid) {
+    // Data not valid
     res.status(response_data.code).json({ Error: response_data.message })
   } else {
     const data = {
@@ -38,7 +40,8 @@ router.post('/', async function (req, res) {
 })
 
 /**
- *
+ * Route to get a pet using the pet's ID from the request parameter. This is an
+ * unprotected endpoint. The pet's information will be returned if the pet exists.
  */
 router.get('/:pet_id', async function (req, res) {
   const pet = await api.get_entity_by_id(PET, req.params.pet_id)
@@ -52,6 +55,7 @@ router.get('/:pet_id', async function (req, res) {
     pet[0].id = req.params.pet_id
     pet[0].self = req.protocol + '://' + req.get('host') + req.originalUrl
 
+    // Adding the URL of a pet's shelter
     if (Object.keys(pet[0].shelter).length !== 0) {
       pet[0].shelter.self =
         req.protocol + '://' + req.get('host') + '/shelters/' + pet[0].shelter.id
@@ -62,7 +66,7 @@ router.get('/:pet_id', async function (req, res) {
 })
 
 /**
- *
+ * Route to get all pets within Datastore. This is an unprotected endpoint.
  */
 router.get('/', async function (req, res) {
   const accepts = req.accepts(['application/json'])
@@ -73,9 +77,11 @@ router.get('/', async function (req, res) {
     const pets = await api.get_entities_pagination(PET, req)
     const total_pets = await api.get_entities(PET)
 
+    // Adding URL for each pet
     pets.items.map((pet) => {
       pet.self = req.protocol + '://' + req.get('host') + '/pets/' + pet.id
 
+      // Adding shelter URL of each pet in a shelter
       if (Object.keys(pet.shelter).length !== 0) {
         pet.shelter.self = req.protocol + '://' + req.get('host') + '/shelters/' + pet.shelter.id
       }
@@ -119,7 +125,8 @@ router.patch('/', function (req, res) {
 })
 
 /**
- *
+ * Route to delete a pet. This is an unprotected endpoint. If the pet belongs
+ * to a shelter, then it will be removed from the shelter.
  */
 router.delete('/:pet_id', async function (req, res) {
   const pet = await api.get_entity_by_id(PET, req.params.pet_id)
@@ -127,9 +134,11 @@ router.delete('/:pet_id', async function (req, res) {
   if (pet[0] === undefined) {
     res.status(404).json({ Error: 'No pet with this pet_id exists' })
   } else {
+    // Removing pet from shelter if in a shelter
     if (Object.keys(pet[0].shelter).length !== 0) {
       const shelter = await api.get_entity_by_id(SHELTER, pet[0].shelter.id)
 
+      // Removing pet
       shelter[0].pets = shelter[0].pets.filter((pet) => pet.id !== req.params.pet_id)
 
       const edited_shelter = await api.edit_entity(SHELTER, pet[0].shelter.id, shelter[0])
@@ -141,7 +150,8 @@ router.delete('/:pet_id', async function (req, res) {
 })
 
 /**
- *
+ * Route to edit one or more of a pet's attributes. This is an unprotected endpoint.
+ * The pet will be edited if all data is valid and the pet exists.
  */
 router.patch('/:pet_id', async function (req, res) {
   const pet = await api.get_entity_by_id(PET, req.params.pet_id)
@@ -152,8 +162,10 @@ router.patch('/:pet_id', async function (req, res) {
     const response_data = await validation.validation_check(req, 'patch', PET)
 
     if (!response_data.valid) {
+      // Data not valid
       res.status(response_data.code).json({ Error: response_data.message })
     } else {
+      // Editing pet data
       const edited_pet_data = {
         name: req.body.name ? req.body.name : pet[0].name,
         species: req.body.species ? req.body.species : pet[0].species,
@@ -175,7 +187,8 @@ router.patch('/:pet_id', async function (req, res) {
 })
 
 /**
- *
+ * Route to edit all of a pet's attributes. This is an unprotected endpoint.
+ * The pet will be edited if all data is valid and the pet exists.
  */
 router.put('/:pet_id', async function (req, res) {
   const pet = await api.get_entity_by_id(PET, req.params.pet_id)
@@ -186,8 +199,10 @@ router.put('/:pet_id', async function (req, res) {
     const response_data = await validation.validation_check(req, 'put', PET)
 
     if (!response_data.valid) {
+      // Data not valid
       res.status(response_data.code).json({ Error: response_data.message })
     } else {
+      // Editing pet data
       const edited_pet_data = {
         name: req.body.name,
         species: req.body.species,

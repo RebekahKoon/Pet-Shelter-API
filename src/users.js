@@ -90,6 +90,7 @@ router.get('/token', async function (req, res) {
   request(data, async (error, response, body) => {
     const token = body.id_token ? body.id_token : 'Incorrect user information. Please try again.'
 
+    // Getting users and finding the user with the matching email to get Auth0 ID
     const users = await api.get_entities(USER)
     const user = users.find((user) => user.email === username)
 
@@ -102,6 +103,9 @@ router.get('/token', async function (req, res) {
   })
 })
 
+/**
+ * Route to get all users within Datastore. This is an unprotected endpoint.
+ */
 router.get('/', async function (req, res) {
   const users = await api.get_entities(USER)
   const accepts = req.accepts(['application/json'])

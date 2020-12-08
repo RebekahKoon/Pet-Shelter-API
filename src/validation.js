@@ -90,7 +90,7 @@ async function validation_check(req, functionality, entity) {
       response_data = validation_response(
         false,
         400,
-        'An attribute not part of an entity was entered'
+        'An attribute not valid for the request body was entered'
       )
     } else if (entity === SHELTER && req.body.name && !unique_name) {
       response_data = validation_response(false, 403, 'The name of the shelter is not unique')

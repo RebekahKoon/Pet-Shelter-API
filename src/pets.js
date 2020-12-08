@@ -181,6 +181,12 @@ router.patch('/:pet_id', async function (req, res) {
       edited_pet[0].id = req.params.pet_id
       edited_pet[0].self = pet_url
 
+      // Adding the URL of a pet's shelter
+      if (Object.keys(edited_pet[0].shelter).length !== 0) {
+        pet[0].shelter.self =
+          req.protocol + '://' + req.get('host') + '/shelters/' + pet[0].shelter.id
+      }
+
       res.status(303).set('Location', pet_url).json(edited_pet[0])
     }
   }
@@ -217,6 +223,12 @@ router.put('/:pet_id', async function (req, res) {
       const pet_url = req.protocol + '://' + req.get('host') + req.originalUrl
       edited_pet[0].id = req.params.pet_id
       edited_pet[0].self = pet_url
+
+      // Adding the URL of a pet's shelter
+      if (Object.keys(edited_pet[0].shelter).length !== 0) {
+        pet[0].shelter.self =
+          req.protocol + '://' + req.get('host') + '/shelters/' + pet[0].shelter.id
+      }
 
       res.status(303).set('Location', pet_url).json(edited_pet[0])
     }

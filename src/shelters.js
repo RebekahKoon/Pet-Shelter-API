@@ -193,6 +193,11 @@ router.patch('/:shelter_id', jwt_info.checkJwt, jwt_info.invalid_jwt, async func
       edited_shelter[0].id = req.params.shelter_id
       edited_shelter[0].self = shelter_url
 
+      // Finding url for each pet in the shelter
+      edited_shelter[0].pets.map((pet) => {
+        pet.self = req.protocol + '://' + req.get('host') + '/pets/' + pet.id
+      })
+
       res.status(303).set('Location', shelter_url).json(edited_shelter[0])
     }
   }
@@ -232,6 +237,11 @@ router.put('/:shelter_id', jwt_info.checkJwt, jwt_info.invalid_jwt, async functi
       const shelter_url = req.protocol + '://' + req.get('host') + req.originalUrl
       edited_shelter[0].id = req.params.shelter_id
       edited_shelter[0].self = shelter_url
+
+      // Finding url for each pet in the shelter
+      edited_shelter[0].pets.map((pet) => {
+        pet.self = req.protocol + '://' + req.get('host') + '/pets/' + pet.id
+      })
 
       res.status(303).set('Location', shelter_url).json(edited_shelter[0])
     }
